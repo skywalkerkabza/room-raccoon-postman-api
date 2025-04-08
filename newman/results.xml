@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Universities API Tests" tests="2" time="0.698">
+  <testsuite name="Get South African Universities" id="a166470e-556d-4543-9186-ccb71beca629" timestamp="2025-04-08T12:29:17.709Z" tests="3" failures="0" errors="0" time="0.467">
+    <testcase name="Status code is 200" time="0.467" classname="GetSouthAfricanUniversities"/>
+    <testcase name="Response has valid JSON" time="0.467" classname="GetSouthAfricanUniversities"/>
+    <testcase name="Response contains universities" time="0.467" classname="GetSouthAfricanUniversities"/>
+  </testsuite>
+  <testsuite name="Verify University of Stellenbosch Exists" id="07ebc3dd-7a3e-4b8e-a15d-c1f5759ae85f" timestamp="2025-04-08T12:29:17.709Z" tests="1" failures="0" errors="0" time="0.231">
+    <testcase name="University of Stellenbosch exists" time="0.231" classname="VerifyUniversityOfStellenboschExists"/>
+  </testsuite>
+</testsuites>
