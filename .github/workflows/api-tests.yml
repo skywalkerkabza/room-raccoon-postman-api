@@ -1,14 +1,14 @@
-name: API Tests with Newman postman
+name: API Tests with Newman
 on:
   schedule:
     - cron: '30 6 * * *'
   push:
-    branches: [ main, master, feature ]
+    branches: [main, master, feature]
   pull_request:
-    branches: [ main, master, feature ]
+    branches: [main, master, feature]
 
 jobs:
-  test:
+  api-tests:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -20,29 +20,8 @@ jobs:
         with:
           node-version: lts/*
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install Newman
+        run: npm install -g newman
 
-      - name: Install Newman HTML Reporter
-        # Ensure the html reporter is available for Newman.
-        run: npm install newman-reporter-html
-
-      - name: Create test-results directory
-        run: mkdir -p ./test-results/api-test-results
-
-      - name: Run API tests
-        run: |
-          newman run universities-collection.json -r html,junit \
-            --reporter-html-export test-results/api-test-results/results.html \
-            --reporter-junit-export test-results/api-test-results/results.xml
-
-      - name: Debug - List files in test-results
-        run: ls -R ./test-results
-
-      - name: Upload API Test Report
-        uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: api-test-report
-          path: ./test-results/api-test-results
-          retention-days: 30
+      - name: Run API tests (CLI only)
+        run: newman run universities-collection.json --reporters cli
