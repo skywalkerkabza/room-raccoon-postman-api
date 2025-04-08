@@ -23,8 +23,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Newman HTML Reporter
+        # Ensure the html reporter is available for Newman.
+        run: npm install newman-reporter-html
+
+      - name: Create test-results directory
+        run: mkdir -p ./test-results/api-test-results
+
       - name: Run API tests
-        run: newman run universities-collection.json -r html,junit --reporter-html-export newman/results.html --reporter-junit-export newman/results.xml
+        run: |
+          newman run universities-collection.json -r html,junit \
+            --reporter-html-export test-results/api-test-results/results.html \
+            --reporter-junit-export test-results/api-test-results/results.xml
 
       - name: Debug - List files in test-results
         run: ls -R ./test-results
