@@ -1,31 +1,64 @@
-name: API Tests
-
+name: API Tests with Newman Postman
 on:
+  schedule:
+    - cron: '30 6 * * *'
   push:
+    branches: [main, master, feature]
   pull_request:
+    branches: [main, master, feature]
 
 jobs:
   api-tests:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '14'
-          cache: 'npm'
+          node-version: lts/*
+          cache: 'npm'  # Enable npm caching for faster builds
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Newman and reporters
+        run: |
+          npm install -g newman
+          npm install -g newman-reporter-html
+          npm install -g newman-reporter-junit
+          npm install  # Install project dependencies if needed
 
-      - name: Run API tests
-        run: npm run test:api:ci
+      - name: Create results directory
+        run: mkdir -p ./newman-results
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v3
+      - name: Run API tests with Newman
+        run: |
+          newman run universities-collection.json \
+            --reporters html,junit \
+            --reporter-html-export ./newman-results/results.html \
+            --reporter-junit-export ./newman-results/results.xml \
+            --color off  # Disable color for CI logs
+
+      - name: Verify test results
+        run: |
+          echo "Test results:"
+          ls -la ./newman-results/
+          # Fail if results files don't exist
+          test -f ./newman-results/results.html && test -f ./newman-results/results.xml
+
+      - name: Upload test results as artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
-          name: api-test-results
-          path: newman/
+          name: newman-test-results
+          path: ./newman-results/*
+          retention-days: 30
+
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: ./newman-results/results.xml
+          check_name: Newman API Test Results
+          comment_mode: update last
+          comment_title: API Test Results Summary
